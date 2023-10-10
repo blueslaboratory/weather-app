@@ -2,37 +2,39 @@
 
 Pasos seguidos:
 
+0. Crear la carpeta backend
+
 
 
 1. Configuracion del entorno:
 
 1.1 Crea un entorno virtual para tu proyecto Django.
-> python -m venv myenv
+API Meteorologica\backend> python -m venv myenv
 
 1.2 Activa el entorno virtual:
 En Windows:
-> myenv\Scripts\activate
+API Meteorologica\backend> myenv\Scripts\activate
 
 1.3 Instala Django
 https://docs.djangoproject.com/en/4.2/
-> pip install django
+API Meteorologica\backend> pip install django
 
 
 
 2. Creación de un Proyecto Django
 
 2.1 Crea un nuevo proyecto Django
-\API Meteorologica> django-admin startproject weather_app
+\API Meteorologica\backend> django-admin startproject weather_app
 
 2.2 Cambia al directorio del proyecto
-> cd weather_app
+\API Meteorologica\backend> cd weather_app
 
 
 
-3. Creación de una Aplicación Django
+3. Creación de una Aplicación Django (Para submodulos (apps) --> saltar)
 
 3.1 Crea una nueva aplicación dentro del proyecto
-\API Meteorologica\weather_app> python manage.py startapp weather
+\API Meteorologica\backend\weather_app> python manage.py startapp weather
 
 
 
@@ -68,3 +70,25 @@ http://127.0.0.1:8000/weather/?city=Madrid
 
 9. Codigo del pais a nombre del pais
 API Meteorologica\weather_app> pip install pycountry
+
+
+
+
+
+
+
+*** FRONTEND REACT (incompleto) ***
+
+0. Node.js debe de estar instalado
+   Crear la carpeta frontend
+
+
+
+1. Crear la carpeta frontend en dentro del directorio \API Meteorologica
+\API Meteorologica> npx create-react-app frontend-app
+
+
+
+2. Realiza Solicitudes a la API de Django
+Dentro de la aplicación de React, puedes usar la biblioteca axios para realizar solicitudes HTTP a tu API de Django.
+\API Meteorologica> npm install axios
