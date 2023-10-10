@@ -92,3 +92,30 @@ API Meteorologica\weather_app> pip install pycountry
 2. Realiza Solicitudes a la API de Django
 Dentro de la aplicación de React, puedes usar la biblioteca axios para realizar solicitudes HTTP a tu API de Django.
 \API Meteorologica> npm install axios
+
+
+
+
+
+
+*** FRONTEND ANGULAR (Pablo) ***
+
+
+
+*** Correr la App ***
+1. Abrir desde Pycharm el proyecto weatherFront:
+\Desktop\pruebas\frontend\weatherFront
+
+
+
+2. Correr desde el Pycharm el Angular CLI Server
+
+
+
+3. Correr Django
+API Meteorologica\backend> myenv\Scripts\activate
+API Meteorologica\weather_app> python manage.py runserver
+
+
+4. URL definida:
+http://127.0.0.1:4200/
