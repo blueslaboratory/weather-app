@@ -1,5 +1,7 @@
 09/10/2023
 
+*** BACKEND (Yo) ***
+
 Pasos seguidos:
 
 0. Crear la carpeta backend
@@ -38,12 +40,50 @@ API Meteorologica\backend> pip install django
 
 
 
-4. Configuración de la Base de Datos (Opcional) --> no lo vamos a hacer
+4. Configuración de la Base de Datos (Opcional) --> lo vamos a hacer
+\API Meteorologica\backend\weather_app> python manage.py startapp weather_db
+
+4.1 Rellenamos: \API Meteorologica\backend\weather_app\weather_db\models.py
+con la informacion filtrada de la llamada a la API
+
+4.2 Instalar la app weather_db
+\API Meteorologica\backend\weather_app\weather_app\settings.py
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    ...
+    'weather_app',
+    'weather_db',
+
+]
+
+4.3 Realizar las migraciones de la DB:
+(Estos comandos crearán la tabla weatherinfo en tu base de datos)
+API Meteorologica\backend\weather_app> python manage.py makemigrations weather_db
+API Meteorologica\backend\weather_app> python manage.py migrate
+
+
+4.4 Lo vamos a crear todo desde weather_app porque desde weather_db no va importar funciones
+--> creamos \weather_app\models.py
+--> creamos \weather_app\functions.py y dentro el metodo guardar_datos_en_db
+--> guardamos en la DB desde \weather_app\views.py
+--> hacer las migraciones para weather_app (automaticamente crea la DB):
+    API Meteorologica\backend\weather_app> python manage.py makemigrations weather_app
+    API Meteorologica\backend\weather_app> python manage.py migrate
+
+
+4.5 Crear un superusuario
+\API Meteorologica\backend\weather_app> python manage.py createsuperuser
+user: admin
+pw: admin
+email: admin@admin.com
+
+
+
 
 
 
 5. Configuración de las Rutas (URLs)
-.\API Meteorologica\weather_app\weather_app\urls.py
+\API Meteorologica\weather_app\weather_app\urls.py
 
 
 
@@ -97,12 +137,13 @@ Dentro de la aplicación de React, puedes usar la biblioteca axios para realizar
 
 
 
-
 *** FRONTEND ANGULAR (Pablo) ***
 
 
 
-*** Correr la App ***
+
+
+*** CORRER LA APP ***
 1. Abrir desde Pycharm el proyecto weatherFront:
 \Desktop\pruebas\frontend\weatherFront
 
@@ -115,6 +156,7 @@ Dentro de la aplicación de React, puedes usar la biblioteca axios para realizar
 3. Correr Django
 API Meteorologica\backend> myenv\Scripts\activate
 API Meteorologica\weather_app> python manage.py runserver
+
 
 
 4. URL definida:

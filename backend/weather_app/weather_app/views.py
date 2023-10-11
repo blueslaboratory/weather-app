@@ -4,6 +4,85 @@ from django.http import JsonResponse
 import datetime
 import pycountry
 
+# Esto no va, no consigo importar desde otro modulo
+# from ..weather_db.views import guardar_datos_en_db
+# from backend.weather_db.views import guardar_datos_en_db
+
+from .functions import guardar_datos_en_db
+from .models import WeatherInfo
+
+from django.db import connection
+
+
+# Recuperar datos de la DB por ciudad
+def get_weather_by_city(request, city):
+
+    try:
+        # Buscar registros en la base de datos que coincidan con la ciudad
+        weather_data = WeatherInfo.objects.filter(city=city)
+
+        if not weather_data:
+            return JsonResponse({'error': 'No se encontraron datos para la ciudad especificada'}, status=404)
+
+        # Convierte los datos en un diccionario
+        weather_info = {
+            'city': city,
+            'data': []
+        }
+
+        for record in weather_data:
+            weather_info['data'].append({
+                'country': record.country,
+                'longitude': record.longitude,
+                'latitude': record.latitude,
+                'temperature': record.temperature,
+                'feels_like': record.feels_like,
+                'temp_min': record.temp_min,
+                'temp_max': record.temp_max,
+                'humidity': record.humidity,
+                'sunrise': record.sunrise.strftime('%H:%M:%S'),
+                'sunset': record.sunset.strftime('%H:%M:%S'),
+                'description': record.description,
+                'api_url': record.api_url,
+            })
+
+        # Devuelve los datos como una respuesta JSON
+        return JsonResponse(weather_info)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# Guardar los datos de las ciudades dentro de la DB
+def saved_cities(request):
+    # Limpiar la tabla
+    delete_data(request)
+
+    ciudades = ['madrid', 'sevilla', 'barcelona', 'valencia', 'zaragoza', 'bilbao', 'vigo', 'cadiz', 'burgos', 'ibiza']
+    for c in ciudades:
+        weather_view(request, c)
+
+    # Luego, crea un diccionario de respuesta
+    response_data = {'message': 'saved_cities correctly executed'}
+
+    # Usa JsonResponse para devolver el diccionario como una respuesta JSON
+    return JsonResponse(response_data)
+
+
+# Borrar todos los contenidos de la tabla weather_app_weatherinfo
+def delete_data(request):
+    WeatherInfo.objects.all().delete()
+    reset_sequence()
+    return JsonResponse({'success': 'Datos eliminados correctamente'}, status=400)
+
+
+# Resetear los ids
+def reset_sequence():
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='weather_app_weatherinfo';")
+
+
+# llamada a la api normal
 def weather_view(request, city = None):
     # A no ser que me lo pases por URL,
     # obtén el parámetro 'city' de la solicitud GET
@@ -27,9 +106,11 @@ def weather_view(request, city = None):
 
         longitude = weather_data['coord']['lon']
         latitude = weather_data['coord']['lat']
-        location = get_location_info(api_key, latitude, longitude)
 
-        city = weather_data['name']
+        country = get_location_info(api_key, latitude, longitude)['country']
+        city = get_location_info(api_key, latitude, longitude)['city']
+
+        # city = weather_data['name']
 
         temperature = kelvin_to_celsius(weather_data['main']['temp'])
         feels_like = kelvin_to_celsius(weather_data['main']['feels_like'])
@@ -46,7 +127,10 @@ def weather_view(request, city = None):
         # Crea un diccionario con los datos meteorológicos
         weather_info = {
             # 'city': city,
-            'location': location,
+            'location': {
+                'country': country,
+                'city': city,
+            },
             'longitude': longitude,
             'latitude': latitude,
             'temperature': {
@@ -61,8 +145,12 @@ def weather_view(request, city = None):
                 'sunset': sunset
             },
             'description': weather_description,
-            'api_url': api_url
+            'api_url': api_url,
         }
+
+        # Guardame los datos en la DB:
+        saved = guardar_datos_en_db(weather_info)
+        weather_info['saved'] = saved
 
         # Devuelve una respuesta JSON con los datos
         return JsonResponse(weather_info)
