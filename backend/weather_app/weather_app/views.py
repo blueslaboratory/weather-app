@@ -8,43 +8,40 @@ import pycountry
 # from ..weather_db.views import guardar_datos_en_db
 # from backend.weather_db.views import guardar_datos_en_db
 
-from .functions import guardar_datos_en_db
+from .functions import *
 from .models import WeatherInfo
 
 from django.db import connection
 
 
 # Recuperar datos de la DB por ciudad
-def get_weather_by_city(request, city):
+def get_weather_by_city(request, city_id):
 
     try:
         # Buscar registros en la base de datos que coincidan con la ciudad
-        weather_data = WeatherInfo.objects.filter(city=city)
+        weather_data = WeatherInfo.objects.filter(id=city_id)
 
         if not weather_data:
             return JsonResponse({'error': 'No se encontraron datos para la ciudad especificada'}, status=404)
 
         # Convierte los datos en un diccionario
-        weather_info = {
-            'city': city,
-            'data': []
-        }
+        weather_info = {}
 
         for record in weather_data:
-            weather_info['data'].append({
-                'country': record.country,
-                'longitude': record.longitude,
-                'latitude': record.latitude,
-                'temperature': record.temperature,
-                'feels_like': record.feels_like,
-                'temp_min': record.temp_min,
-                'temp_max': record.temp_max,
-                'humidity': record.humidity,
-                'sunrise': record.sunrise.strftime('%H:%M:%S'),
-                'sunset': record.sunset.strftime('%H:%M:%S'),
-                'description': record.description,
-                'api_url': record.api_url,
-            })
+            weather_info['country'] = record.country
+            weather_info['city'] = record.city
+            weather_info['longitude'] = record.longitude
+            weather_info['latitude'] = record.latitude
+            weather_info['temperature'] = record.temperature
+            weather_info['feels_like'] = record.feels_like
+            weather_info['temp_min'] = record.temp_min
+            weather_info['temp_max'] = record.temp_max
+            weather_info['humidity'] = record.humidity
+            weather_info['sunrise'] = record.sunrise.strftime('%H:%M:%S')
+            weather_info['sunset'] = record.sunset.strftime('%H:%M:%S')
+            weather_info['description'] = record.description
+            weather_info['api_url'] = record.api_url
+
 
         # Devuelve los datos como una respuesta JSON
         return JsonResponse(weather_info)
@@ -54,19 +51,27 @@ def get_weather_by_city(request, city):
 
 
 # Guardar los datos de las ciudades dentro de la DB
-def saved_cities(request):
-    # Limpiar la tabla
+def guardar_cities(request):
     delete_data(request)
 
-    ciudades = ['madrid', 'sevilla', 'barcelona', 'valencia', 'zaragoza', 'bilbao', 'vigo', 'cadiz', 'burgos', 'ibiza']
-    for c in ciudades:
+    ciudades = {
+        1: 'madrid',
+        2: 'sevilla',
+        3: 'barcelona',
+        4: 'valencia',
+        5: 'zaragoza',
+        6: 'bilbao',
+        7: 'vigo',
+        8: 'cadiz',
+        9: 'burgos',
+        10: 'ibiza'
+    }
+
+    for c in ciudades.values():
         weather_view(request, c)
 
-    # Luego, crea un diccionario de respuesta
-    response_data = {'message': 'saved_cities correctly executed'}
+    return JsonResponse({'message': 'saved_cities correctly executed'})
 
-    # Usa JsonResponse para devolver el diccionario como una respuesta JSON
-    return JsonResponse(response_data)
 
 
 # Borrar todos los contenidos de la tabla weather_app_weatherinfo
@@ -149,14 +154,17 @@ def weather_view(request, city = None):
         }
 
         # Guardame los datos en la DB:
-        saved = guardar_datos_en_db(weather_info)
+        saved = guardar_datos_en_db2(weather_info)
         weather_info['saved'] = saved
 
         # Devuelve una respuesta JSON con los datos
         return JsonResponse(weather_info)
 
     # En caso de error, devuelve una respuesta de error JSON
-    return JsonResponse({'error': 'No se pudo obtener la información meteorológica.'}, status=400)
+    return JsonResponse({
+        'city': city,
+        'error': 'No se pudo obtener la informacion meteorologica.'
+    }, status=400)
 
 
 def get_location_info(api_key, latitude, longitude):
